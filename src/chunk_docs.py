@@ -1,0 +1,38 @@
+from pypdf import PdfReader
+import os
+
+CHUNK_SIZE = 500
+
+def load_doc(DOC_NAME: str):
+    pdf_path = os.path.join('data', DOC_NAME)
+    pdf_text = ""
+    with open(pdf_path, "rb") as file:
+        reader = PdfReader(file)
+        for page in reader.pages: pdf_text += page.extract_text()
+    return pdf_text
+
+pdf = 'HDFC-Life-Guaranteed-Wealth-Plus-101N165V13-Policy-Document.pdf'
+
+print(f"Loading document: {pdf}")
+pdf_text = load_doc(pdf)
+print(f"Total characters in document: {len(pdf_text)}")
+
+pdf_chunks = [pdf_text[i:i+CHUNK_SIZE] for i in range(0, len(pdf_text), CHUNK_SIZE)]
+print(f"Total chunks created: {len(pdf_chunks)}")
+
+# Print first 3 chunks for inspection
+for i, chunk in enumerate(pdf_chunks[:3]):
+    print(f"\n--- Chunk {i+1} ---\n{chunk[:100]}... {chunk[-10:]}\n")
+
+# First Chunk print
+first_chunk = pdf_chunks[0]
+print(f"First chunk -> :\n{first_chunk}")
+
+# Chunk number middle print
+middle_index = len(pdf_chunks) // 2
+middle_chunk = pdf_chunks[middle_index] 
+print(f"\nMiddle chunk (Chunk {middle_index + 1}) -> :\n{middle_chunk}")
+
+# Last Chunk print
+last_chunk = pdf_chunks[-1]
+print(f"\nLast chunk -> :\n{last_chunk}")
