@@ -66,6 +66,43 @@ def search(query, k=5):
     scores, indices = index.search(q_emb, k)
     return [(all_chunks[i], scores[0][j]) for j, i in enumerate(indices[0])]
 
+# Function to perform search on the FAISS index
+def search_with_metadata(query, k=5):
+    """
+    Search for the most similar chunks to a given query using semantic similarity.
+    
+    This function encodes the input query into a vector embedding using a pre-trained
+    sentence transformer model, then searches a FAISS index to find the k most similar
+    chunks based on their embeddings.
+    
+    Args:
+        query (str): The search query string to find similar chunks for.
+        k (int, optional): The number of most similar chunks to return. Defaults to 5.
+    
+    Returns:
+        list: A list of dictionaries, each containing:
+            - "chunk" (str): The text content of the matching chunk.
+            - "metadata" (dict): Associated metadata for the chunk.
+            - "distance" (float): The semantic distance/similarity score between
+              the query and chunk (lower values indicate higher similarity).
+    """
+    model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+    q_emb = model.encode(
+        [query],
+        convert_to_numpy=True,
+        show_progress_bar=True
+    )
+    distances, indices = index.search(q_emb, k)
+    results = []
+    for dist, idx in zip(distances[0], indices[0]):
+        result = {
+            "chunk": all_chunks[idx],
+            "metadata": chunk_metadata[idx],
+            "distance": float(dist)
+        }
+        results.append(result)
+    return results
+
 if __name__ == "__main__":
     query = "What is the maturity benefit of HDFC Life Click 2 Wealth Plan?"
     results = search(query, k=3)
