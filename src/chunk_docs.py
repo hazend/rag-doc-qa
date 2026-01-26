@@ -29,14 +29,14 @@ def all_doc_chunk():
 
     for i, doc_file in enumerate(os.listdir('data')):
         if doc_file.endswith('.pdf'):
-            print(f"Processing document: {doc_file}")
+            # print(f"Processing document: {doc_file}")
             doc_text = load_doc(doc_file)
-            print(f"Document# {i+1} : '{doc_file}' loaded with {len(doc_text)} characters.")
+            # print(f"Document# {i+1} : '{doc_file}' loaded with {len(doc_text)} characters.")
             doc_chunks = chunk_pdf_text(doc_text)
-            print(f"Document# {i+1} : '{doc_file}' chunked into {len(doc_chunks)} chunks.")
+            # print(f"Document# {i+1} : '{doc_file}' chunked into {len(doc_chunks)} chunks.")
             all_docs_chunks[doc_file] = doc_chunks
 
-    print(f"\nTotal documents processed: {len(all_docs_chunks)}")
+    # print(f"\nTotal documents processed: {len(all_docs_chunks)}")
 
     return all_docs_chunks
 

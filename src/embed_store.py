@@ -6,24 +6,7 @@ import pickle
 
 pdf_data = all_doc_chunk()
 all_chunks = list(pdf_data.values())
-
-# for doc_chunk in all_chunks:
-#     for chunk in doc_chunk:
-#         print(chunk[:10])  # Print first 100 characters of each chunk
-
 chunk_metadata = []
-"""
-chunk_metadata: List[Dict[str, Union[str, int]]]
-    A list of dictionaries containing metadata for each chunk extracted from PDF documents.
-    Each dictionary contains:
-    - "source" (str): The name of the PDF document from which the chunk was extracted
-    - "chunk_id" (int): The sequential index/ID of the chunk within its source document
-    This metadata is used to track the origin and position of each chunk in the document
-    collection for retrieval and reference purposes in the RAG (Retrieval-Augmented Generation)
-    pipeline.
-"""
-
-# Collect metadata for each chunk
 for pdf_name, chunks in pdf_data.items():
     for i, chunk in enumerate(chunks):
         all_chunks.append(chunk)
@@ -32,42 +15,8 @@ for pdf_name, chunks in pdf_data.items():
             "chunk_id": i
         })
 
-# print(chunk_metadata[:5])  # Print first 5 metadata entries for inspection
-# print(len(chunk_metadata))  # Print total number of chunks processed
-
-model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
-
-print("Generating embeddings for all chunks...")
-embeddings = model.encode(all_chunks, convert_to_numpy=True, show_progress_bar=True)
-print("Embeddings generated with shape:", embeddings.shape)
-
-dimension = embeddings.shape[1]
-
-index = faiss.IndexFlatL2(dimension)
-index.add(embeddings)   
-
-print("Total vectors:", index.ntotal)
-
-faiss.write_index(index, "data/faiss.index")
-
-with open("data/all_chunks.pkl", "wb") as f:
-    pickle.dump(all_chunks, f)
-
-with open("data/chunk_metadata.pkl", "wb") as f:
-    pickle.dump(chunk_metadata, f)
-
-def search(query, k=5):
-    q_emb = model.encode(
-        [query],
-        convert_to_numpy=True,
-        normalize_embeddings=True
-    )
-
-    scores, indices = index.search(q_emb, k)
-    return [(all_chunks[i], scores[0][j]) for j, i in enumerate(indices[0])]
-
 # Function to perform search on the FAISS index
-def search_with_metadata(query, k=5):
+def search_with_metadata(query, index, k=5):
     """
     Search for the most similar chunks to a given query using semantic similarity.
     
@@ -104,6 +53,50 @@ def search_with_metadata(query, k=5):
     return results
 
 if __name__ == "__main__":
+
+        
+    
+
+    # for doc_chunk in all_chunks:
+    #     for chunk in doc_chunk:
+    #         print(chunk[:10])  # Print first 100 characters of each chunk
+
+    
+
+    # print(chunk_metadata[:5])  # Print first 5 metadata entries for inspection
+    # print(len(chunk_metadata))  # Print total number of chunks processed
+
+    model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+
+    print("Generating embeddings for all chunks...")
+    embeddings = model.encode(all_chunks, convert_to_numpy=True, show_progress_bar=True)
+    print("Embeddings generated with shape:", embeddings.shape)
+
+    dimension = embeddings.shape[1]
+
+    index = faiss.IndexFlatL2(dimension)
+    index.add(embeddings)   
+
+    print("Total vectors:", index.ntotal)
+
+    faiss.write_index(index, "data/faiss.index")
+
+    with open("data/all_chunks.pkl", "wb") as f:
+        pickle.dump(all_chunks, f)
+
+    with open("data/chunk_metadata.pkl", "wb") as f:
+        pickle.dump(chunk_metadata, f)
+
+    def search(query, k=5):
+        q_emb = model.encode(
+            [query],
+            convert_to_numpy=True,
+            normalize_embeddings=True
+        )
+
+        scores, indices = index.search(q_emb, k)
+        return [(all_chunks[i], scores[0][j]) for j, i in enumerate(indices[0])]
+
     query = "What is the maturity benefit of HDFC Life Click 2 Wealth Plan?"
     results = search(query, k=3)
 
