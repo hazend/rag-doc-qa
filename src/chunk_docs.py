@@ -2,9 +2,10 @@ from pypdf import PdfReader
 import os
 
 CHUNK_SIZE = 500
+DATA_PATH = 'C:\\Users\\AngadJaswal\\Projects\\rag-doc-qa\\data'
 
 def load_doc(DOC_NAME: str):
-    pdf_path = os.path.join('data', DOC_NAME)
+    pdf_path = os.path.join(DATA_PATH, DOC_NAME)
     pdf_text = ""
     with open(pdf_path, "rb") as file:
         reader = PdfReader(file)
@@ -27,7 +28,7 @@ def all_doc_chunk():
     """
     all_docs_chunks = {}
 
-    for i, doc_file in enumerate(os.listdir('data')):
+    for i, doc_file in enumerate(os.listdir(DATA_PATH)):
         if doc_file.endswith('.pdf'):
             # print(f"Processing document: {doc_file}")
             doc_text = load_doc(doc_file)
