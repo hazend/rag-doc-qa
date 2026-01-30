@@ -8,9 +8,9 @@ import time
 # -----------------------------
 # Config
 # -----------------------------
-FAISS_INDEX_PATH = "data/faiss.index"
-CHUNKS_PATH = "data/all_chunks.pkl"
-METADATA_PATH = "data/chunk_metadata.pkl"
+FAISS_INDEX_PATH = "C:\\Users\\AngadJaswal\\Projects\\rag-doc-qa\\data\\faiss.index"
+CHUNKS_PATH = "C:\\Users\\AngadJaswal\\Projects\\rag-doc-qa\\data\\all_chunks.pkl"
+METADATA_PATH = "C:\\Users\\AngadJaswal\\Projects\\rag-doc-qa\\data\\chunk_metadata.pkl"
 QUESTION_FILE = "C:\\Users\\AngadJaswal\\Projects\\rag-doc-qa\\src\\question.txt"
 MODEL_NAME = "HuggingFaceH4/zephyr-7b-beta"
 TOP_K = 5
