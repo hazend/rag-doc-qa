@@ -1,5 +1,4 @@
 from chunk_docs import all_doc_chunk
-import os
 from sentence_transformers import SentenceTransformer
 import faiss
 import pickle
@@ -53,18 +52,6 @@ def search_with_metadata(query, index, k=5):
     return results
 
 if __name__ == "__main__":
-
-        
-    
-
-    # for doc_chunk in all_chunks:
-    #     for chunk in doc_chunk:
-    #         print(chunk[:10])  # Print first 100 characters of each chunk
-
-    
-
-    # print(chunk_metadata[:5])  # Print first 5 metadata entries for inspection
-    # print(len(chunk_metadata))  # Print total number of chunks processed
 
     model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 

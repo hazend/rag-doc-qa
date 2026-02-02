@@ -38,7 +38,7 @@ def all_doc_chunk():
             all_docs_chunks[doc_file] = doc_chunks
 
     # print(f"\nTotal documents processed: {len(all_docs_chunks)}")
-
+    
     return all_docs_chunks
 
 if __name__ == "__main__":
