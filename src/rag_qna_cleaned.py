@@ -8,12 +8,13 @@ import time
 # -----------------------------
 # Config
 # -----------------------------
-FAISS_INDEX_PATH = "data/faiss.index"
-CHUNKS_PATH = "data/all_chunks.pkl"
-METADATA_PATH = "data/chunk_metadata.pkl"
+FAISS_INDEX_PATH = "C:\\Users\\AngadJaswal\\Projects\\rag-doc-qa\\data\\faiss.index"
+CHUNKS_PATH = "C:\\Users\\AngadJaswal\\Projects\\rag-doc-qa\\data\\all_chunks.pkl"
+METADATA_PATH = "C:\\Users\\AngadJaswal\\Projects\\rag-doc-qa\\data\\chunk_metadata.pkl"
 QUESTION_FILE = "C:\\Users\\AngadJaswal\\Projects\\rag-doc-qa\\src\\question.txt"
 MODEL_NAME = "HuggingFaceH4/zephyr-7b-beta"
 TOP_K = 5
+RETRIEVAL_THRESHOLD = 1.0  # Adjust based on your vector store's distance metric
 
 
 # -----------------------------
@@ -109,7 +110,34 @@ def run_qna():
 
     # Retrieve
     results = search_with_metadata(question, index, k=TOP_K)
-    chunks = [res["chunk"] for res in results]
+
+    # Print retrieval results distances for inspection
+    print("\nTop retrieval distances:")
+    for r in results[:5]:
+        print(f"{r['distance']:.3f} - {r['metadata']['source']}")
+
+
+    # Implement retrieval thresholding
+
+    # Sort by best (lowest) distance
+    results = sorted(results, key=lambda x: x["distance"])
+
+    best_distance = results[0]["distance"]
+
+    if best_distance > RETRIEVAL_THRESHOLD:
+        print("\nAnswer:\nI don't know.")
+        print(
+            f"(Reason: best retrieval distance {best_distance:.3f} "
+            f"exceeds threshold {RETRIEVAL_THRESHOLD})"
+        )
+        exit()
+
+    # Filter results based on threshold
+    filtered_results = [
+    r for r in results if r["distance"] <= RETRIEVAL_THRESHOLD
+    ]
+
+    chunks = [r["chunk"] for r in filtered_results]
 
     print(f"\nRetrieved {len(chunks)} chunks")
 
