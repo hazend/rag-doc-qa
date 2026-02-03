@@ -1,5 +1,4 @@
 from chunk_docs import all_doc_chunk
-import os
 from sentence_transformers import SentenceTransformer
 import faiss
 import pickle
@@ -39,7 +38,7 @@ def search_with_metadata(query, index, k=5):
     q_emb = model.encode(
         [query],
         convert_to_numpy=True,
-        show_progress_bar=True
+        show_progress_bar=False
     )
     distances, indices = index.search(q_emb, k)
     results = []
@@ -51,55 +50,3 @@ def search_with_metadata(query, index, k=5):
         }
         results.append(result)
     return results
-
-if __name__ == "__main__":
-
-        
-    
-
-    # for doc_chunk in all_chunks:
-    #     for chunk in doc_chunk:
-    #         print(chunk[:10])  # Print first 100 characters of each chunk
-
-    
-
-    # print(chunk_metadata[:5])  # Print first 5 metadata entries for inspection
-    # print(len(chunk_metadata))  # Print total number of chunks processed
-
-    model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
-
-    print("Generating embeddings for all chunks...")
-    embeddings = model.encode(all_chunks, convert_to_numpy=True, show_progress_bar=True)
-    print("Embeddings generated with shape:", embeddings.shape)
-
-    dimension = embeddings.shape[1]
-
-    index = faiss.IndexFlatL2(dimension)
-    index.add(embeddings)   
-
-    print("Total vectors:", index.ntotal)
-
-    faiss.write_index(index, "data/faiss.index")
-
-    with open("data/all_chunks.pkl", "wb") as f:
-        pickle.dump(all_chunks, f)
-
-    with open("data/chunk_metadata.pkl", "wb") as f:
-        pickle.dump(chunk_metadata, f)
-
-    def search(query, k=5):
-        q_emb = model.encode(
-            [query],
-            convert_to_numpy=True,
-            normalize_embeddings=True
-        )
-
-        scores, indices = index.search(q_emb, k)
-        return [(all_chunks[i], scores[0][j]) for j, i in enumerate(indices[0])]
-
-    query = "What is the maturity benefit of HDFC Life Click 2 Wealth Plan?"
-    results = search(query, k=3)
-
-    print(f"Top results for query: '{query}'\n")
-    for i, (chunk, score) in enumerate(results):
-        print(f"Result {i+1} (Score: {score:.4f}):\n{chunk}\n")
