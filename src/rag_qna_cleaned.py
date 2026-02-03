@@ -8,6 +8,7 @@ import time
 # -----------------------------
 # Config
 # -----------------------------
+# Your paths
 FAISS_INDEX_PATH = "C:\\Users\\AngadJaswal\\Projects\\rag-doc-qa\\data\\faiss.index"
 CHUNKS_PATH = "C:\\Users\\AngadJaswal\\Projects\\rag-doc-qa\\data\\all_chunks.pkl"
 METADATA_PATH = "C:\\Users\\AngadJaswal\\Projects\\rag-doc-qa\\data\\chunk_metadata.pkl"
@@ -21,9 +22,6 @@ RETRIEVAL_THRESHOLD = 1.0  # Adjust based on your vector store's distance metric
 # Load persisted artifacts
 # -----------------------------
 def load_vector_store(index_flg=True, chunk_metadata=False):
-    
-    # if index_flg or chunk_metadata:
-    #     print("Loading FAISS index and chunk data...")
 
     if index_flg: index = faiss.read_index(FAISS_INDEX_PATH)
 
@@ -33,12 +31,6 @@ def load_vector_store(index_flg=True, chunk_metadata=False):
 
         with open(METADATA_PATH, "rb") as f:
             metadata = pickle.load(f)
-
-    # if index_flg: 
-    #     print(f"Vectors loaded: {index.ntotal}")
-    # if chunk_metadata:
-    #     print(f"Chunks loaded: {len(chunks)}")
-    #     print(f"Metadata entries loaded: {len(metadata)}")
 
     if chunk_metadata and index_flg: return index, chunks, metadata
     elif index_flg: return index
@@ -100,8 +92,6 @@ def generate_answer(prompt, temperature=1, max_tokens=1000):
 # -----------------------------
 def run_qna():
 
-    start_time = time.time()
-
     # Load data (index is loaded only to ensure availability)
     index = load_vector_store()
 
@@ -112,25 +102,14 @@ def run_qna():
     # Retrieve
     results = search_with_metadata(question, index, k=TOP_K)
 
-    ## Print retrieval results distances for inspection
-    # print("\nTop retrieval distances:")
-    # for r in results[:5]:
-    #     print(f"{r['distance']:.3f} - {r['metadata']['source']}")
+    # Implementation- retrieval thresholding
 
-
-    # Implement retrieval thresholding
-
-    # Sort by best (lowest) distance
     results = sorted(results, key=lambda x: x["distance"])
 
     best_distance = results[0]["distance"]
 
     if best_distance > RETRIEVAL_THRESHOLD:
         print("\nAnswer:\nI don't know.")
-        # print(
-        #     f"(Reason: best retrieval distance {best_distance:.3f} "
-        #     f"exceeds threshold {RETRIEVAL_THRESHOLD})"
-        # )
         exit()
 
     # Filter results based on threshold
@@ -140,21 +119,13 @@ def run_qna():
 
     chunks = [r["chunk"] for r in filtered_results]
 
-    # print(f"\nRetrieved {len(chunks)} chunks")
-
     # Build prompt
     prompt = build_prompt(chunks, question)
 
     # Generate answer
-    # print("\nQuerying LLM...")
     answer = generate_answer(prompt, temperature=0.1)
 
     print("\nAnswer:\n")
     print(answer)
     
-    elapsed_time = time.time() - start_time
-    # print(f"\nTotal time: {elapsed_time:.2f} seconds")
 
-
-if __name__ == "__main__":
-    run_qna()
